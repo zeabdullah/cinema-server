@@ -1,5 +1,5 @@
 <?php
-require('../connection/connection.php');
+require '../connection/connection.php';
 
 $sql =
     'CREATE TABLE IF NOT EXISTS films(
@@ -23,6 +23,7 @@ $sql =
     );
 ';
 
+echo 'Migration 001:';
 $firstSuccess = $mysqli->multi_query($sql);
 if ($firstSuccess) {
     echo 'first ok' . '<br>';
