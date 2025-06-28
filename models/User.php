@@ -82,6 +82,24 @@ class User extends Model
         return true;
     }
 
+    public static function auth(string $email, string $password)
+    {
+        global $mysqli;
+        $sql = sprintf("SELECT email, password FROM %s where email like ?", static::$table_name);
+
+        $query = $mysqli->prepare($sql);
+        $query->bind_param("s", $email);
+        $query->execute();
+
+        $data = $query->get_result()->fetch_assoc();
+
+        if (is_array($data)) {
+            return password_verify($password, $data['password']);
+        }
+
+        return false;
+    }
+
     private static function saveToDb(array $data): int
     {
         global $mysqli;
