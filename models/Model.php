@@ -1,14 +1,18 @@
 <?php
+require('../connection/connection.php');
+
 abstract class Model
 {
     protected int $id;
+    protected string $created_at;
+    protected string $updated_at;
 
     protected static string $table_name;
     protected static string $primary_key = "id";
 
     public function __construct(array $data)
     {
-        $this->id = $data['id'];
+        $this->id = $data['id'] ?? -1;
     }
 
     public static function findById(int $id)
@@ -49,14 +53,8 @@ abstract class Model
         return $objects;
     }
 
-    public static function create()
-    {
-
-    }
-    public function update()
-    {
-
-    }
+    abstract public static function create(array $data);
+    // abstract public function update();
 
     public function delete()
     {
