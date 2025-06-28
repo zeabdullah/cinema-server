@@ -1,5 +1,5 @@
 <?php
-require('../connection/connection.php');
+require '../connection/connection.php';
 
 abstract class Model
 {
@@ -53,22 +53,27 @@ abstract class Model
         return $objects;
     }
 
+    abstract public function save();
+
     abstract public static function create(array $data);
+
     // abstract public function update();
 
-    public function delete()
+    public function delete(): bool
     {
         global $mysqli;
-        try {
-            $sql = sprintf("DELETE FROM %s WHERE %s = ?", static::$table_name, static::$primary_key);
+        $sql = sprintf("DELETE FROM %s WHERE %s = ?", static::$table_name, static::$primary_key);
 
-            $query = $mysqli->prepare($sql);
-            $query->bind_param("i", $this->id);
-            $query->execute();
+        $query = $mysqli->prepare($sql);
+        $query->bind_param("i", $this->id);
+        $query->execute();
 
-            return 'delete success';
-        } catch (\Throwable $th) {
-            return $th->__tostring();
-        }
+        return true;
     }
+
+    /**
+     * Returns an associative array respresentation of the model
+     * @return array
+     */
+    abstract public function toArray(): array;
 }
