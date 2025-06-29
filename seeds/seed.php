@@ -1,5 +1,40 @@
 <?php
 require '../models/User.php';
+require '../models/Film.php';
+
+function seed_films(): void
+{
+    $filmsToCreate = [
+        [
+            'title' => 'Avengers: Infinity war',
+            'genre' => 'action',
+            'description' => "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Nihil perspiciatis numquam itaque.",
+            'release_year' => 2003,
+            'trailer_url' => 'http://cdn.example.com/trailers?id=43225',
+            'duration' => 104,
+        ],
+        [
+            'title' => 'Uncharted',
+            'genre' => 'adventure',
+            'description' => "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quos, ut. Harum, pariatur aliquid!",
+            'release_year' => 2022,
+            'trailer_url' => 'http://cdn.example.com/trailers?id=750',
+            'duration' => 130,
+        ],
+        [
+            'title' => 'Avengers: Endgame',
+            'genre' => 'action',
+            'description' => "Sit amet consectetur adipisicing elit. Nihil perspiciatis numquam itaque.",
+            'release_year' => 2019,
+            'trailer_url' => 'http://cdn.example.com/trailers?id=324',
+            'duration' => 129,
+        ]
+    ];
+
+    foreach ($filmsToCreate as $f) {
+        Film::create($f);
+    }
+}
 
 function seed_users()
 {
@@ -31,7 +66,8 @@ function seed_users()
 
 function seed_db()
 {
-    seed_users();
+    // seed_users();
+    seed_films();
     echo json_encode([
         'message' => 'Successfully seeded the database!'
     ]);

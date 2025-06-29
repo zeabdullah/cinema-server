@@ -26,8 +26,7 @@ abstract class Model
         );
 
         $query = $mysqli->prepare($sql);
-        $query->bind_param("i", $id);
-        $query->execute();
+        $query->execute([$id]);
 
         $data = $query->get_result()->fetch_assoc();
 
@@ -53,7 +52,7 @@ abstract class Model
         return $objects;
     }
 
-    abstract public function save();
+    abstract public function save(): bool;
 
     abstract public static function create(array $data);
 
@@ -61,19 +60,17 @@ abstract class Model
 
     public function delete(): bool
     {
+        if ($this->id === -1) {
+            return false;
+        }
         global $mysqli;
+
         $sql = sprintf("DELETE FROM %s WHERE %s = ?", static::$table_name, static::$primary_key);
-
-        $query = $mysqli->prepare($sql);
-        $query->bind_param("i", $this->id);
-        $query->execute();
-
-        return true;
+        return $mysqli->prepare($sql)->execute([$this->id]);
     }
 
     /**
      * Returns an associative array respresentation of the model
-     * @return array
      */
     abstract public function toArray(): array;
 }

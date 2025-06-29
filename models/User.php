@@ -55,7 +55,7 @@ class User extends Model
         $this->last_name = $last_name;
     }
 
-    public static function create(array $data): User
+    public static function create(array $data): self
     {
         $newUserId = self::saveToDb([
             'email' => $data['email'],
@@ -69,7 +69,7 @@ class User extends Model
         return new self($data);
     }
 
-    public function save()
+    public function save(): bool
     {
         $newUserId = self::saveToDb([
             'email' => $this->email,
@@ -82,14 +82,16 @@ class User extends Model
         return true;
     }
 
+    // TODO
+    // public function update(): bool {}
+
     public static function auth(string $email, string $password)
     {
         global $mysqli;
         $sql = sprintf("SELECT id, email, password, first_name, last_name FROM %s where email like ?", static::$table_name);
 
         $query = $mysqli->prepare($sql);
-        $query->bind_param("s", $email);
-        $query->execute();
+        $query->execute([$email]);
 
         $data = $query->get_result()->fetch_assoc();
 
@@ -107,14 +109,12 @@ class User extends Model
         $sql = sprintf("INSERT INTO %s values (null, ?, ?, ?, null, null, ?)", static::$table_name);
 
         $query = $mysqli->prepare($sql);
-        $query->bind_param(
-            "ssss",
+        $query->execute([
             $data['email'],
             $data['first_name'],
             $data['last_name'],
             $data['password'],
-        );
-        $query->execute();
+        ]);
 
         return $query->insert_id;
     }
