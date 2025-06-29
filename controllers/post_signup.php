@@ -1,4 +1,5 @@
 <?php
+require '../helpers/cors.php';
 require '../helpers/helpers.php';
 require '../models/User.php';
 
