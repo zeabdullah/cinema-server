@@ -18,7 +18,9 @@ if (!propertiesExist($json, ['email', 'password'])) {
     return http_response_code(400);
 }
 
-if (!User::auth($json->email, $json->password)) {
+$authedUser = User::auth($json->email, $json->password);
+
+if (!$authedUser) {
     echo json_encode([
         "message" => "Invalid login credentials"
     ]);
@@ -26,5 +28,6 @@ if (!User::auth($json->email, $json->password)) {
 }
 
 echo json_encode([
-    "message" => "Login success!"
+    "message" => "Login success!",
+    'data' => $authedUser->toArray(),
 ]);
