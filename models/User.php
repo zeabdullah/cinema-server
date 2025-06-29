@@ -85,7 +85,7 @@ class User extends Model
     public static function auth(string $email, string $password)
     {
         global $mysqli;
-        $sql = sprintf("SELECT email, password FROM %s where email like ?", static::$table_name);
+        $sql = sprintf("SELECT id, email, password, first_name, last_name FROM %s where email like ?", static::$table_name);
 
         $query = $mysqli->prepare($sql);
         $query->bind_param("s", $email);
@@ -94,7 +94,7 @@ class User extends Model
         $data = $query->get_result()->fetch_assoc();
 
         if (is_array($data)) {
-            return password_verify($password, $data['password']);
+            return password_verify($password, $data['password']) ? new self($data) : false;
         }
 
         return false;
