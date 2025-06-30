@@ -10,6 +10,8 @@ abstract class Model
     protected static string $table_name;
     protected static string $primary_key = "id";
 
+    protected const LIMIT = 20;
+
     public function __construct(array $data)
     {
         $this->id = $data['id'] ?? -1;

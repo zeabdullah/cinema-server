@@ -8,7 +8,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     return http_response_code(404);
 }
 
-$films = Film::getAll();
-$filmsArr = array_map(fn(Film $film) => $film->toArray(), $films);
+$search = $_GET['search'] ?? '';
+$page = (int) $_GET['page'] ?? 1;
+$genre = $_GET['genre'] ?? null;
 
-echo json_encode($filmsArr);
+$result = Film::search($search, $page, $genre);
+
+echo json_encode($result);

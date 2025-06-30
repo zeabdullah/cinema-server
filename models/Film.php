@@ -84,6 +84,59 @@ class Film extends Model
         $this->duration = $duration;
     }
 
+    public static function search(string $search = '', int $page = 1, string $genre = null)
+    {
+        $page = max($page, 1);
+        $isGenreSet = isset($genre) && $genre !== '';
+
+        global $mysqli;
+
+        $dataSql = sprintf(
+            "SELECT * FROM %s 
+                WHERE title LIKE ? %s
+                LIMIT %d
+                OFFSET %d
+            ",
+            static::$table_name,
+            $isGenreSet ? "AND genre like ?" : "",
+            static::LIMIT,
+            static::LIMIT * ($page - 1)
+        );
+        $countSql = sprintf(
+            "SELECT COUNT(*) 
+                FROM %s 
+                WHERE title LIKE ? %s
+            ",
+            static::$table_name,
+            $isGenreSet ? "AND genre like ?" : "",
+        );
+
+        $dataQuery = $mysqli->prepare($dataSql);
+        $countQuery = $mysqli->prepare($countSql);
+
+        $searchWithWildcard = "%$search%";
+        if ($isGenreSet) {
+            $dataQuery->bind_param('ss', $searchWithWildcard, $genre);
+            $countQuery->bind_param('ss', $searchWithWildcard, $genre);
+        } else {
+            $dataQuery->bind_param('s', $searchWithWildcard);
+            $countQuery->bind_param('s', $searchWithWildcard);
+        }
+
+        $dataQuery->execute();
+        $films = $dataQuery->get_result()->fetch_all(MYSQLI_ASSOC);
+
+        $countQuery->execute();
+        $count = $countQuery->get_result()->fetch_row()[0];
+
+        return [
+            'page' => $page,
+            'count' => $count,
+            'limit' => static::LIMIT,
+            'data' => $films,
+        ];
+    }
+
     public function toArray(): array
     {
         return [
