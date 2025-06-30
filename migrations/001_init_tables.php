@@ -1,5 +1,5 @@
 <?php
-require '../connection/connection.php';
+require_once '../connection/connection.php';
 
 $sql =
     'CREATE TABLE IF NOT EXISTS films(

@@ -1,5 +1,5 @@
 <?php
-require '../connection/connection.php';
+require_once '../connection/connection.php';
 
 abstract class Model
 {
@@ -20,14 +20,13 @@ abstract class Model
         global $mysqli;
 
         $sql = sprintf(
-            "Select * from %s WHERE %s = ?",
+            "SELECT * FROM %s WHERE %s = ?",
             static::$table_name,
             static::$primary_key
         );
 
         $query = $mysqli->prepare($sql);
-        $query->bind_param("i", $id);
-        $query->execute();
+        $query->execute([$id]);
 
         $data = $query->get_result()->fetch_assoc();
 
@@ -38,7 +37,7 @@ abstract class Model
     {
         global $mysqli;
 
-        $sql = sprintf("Select * from %s", static::$table_name);
+        $sql = sprintf("SELECT * FROM %s", static::$table_name);
 
         $query = $mysqli->prepare($sql);
         $query->execute();
@@ -53,27 +52,95 @@ abstract class Model
         return $objects;
     }
 
-    abstract public function save();
-
-    abstract public static function create(array $data);
-
-    // abstract public function update();
-
-    public function delete(): bool
+    public function save(): bool
     {
-        global $mysqli;
-        $sql = sprintf("DELETE FROM %s WHERE %s = ?", static::$table_name, static::$primary_key);
+        if ($this->id === -1) {
+            return false;
+        }
 
-        $query = $mysqli->prepare($sql);
-        $query->bind_param("i", $this->id);
-        $query->execute();
+        $data = $this->toArray();
+        unset($data['id']); // to prevent db insertion with ID '-1'
+
+        $this->id = static::insert($data);
 
         return true;
     }
 
+    public static function create(array $data)
+    {
+        $data['id'] = static::insert($data);
+        return new static($data);
+    }
+
+    private static function insert(array $data)
+    {
+        global $mysqli;
+
+        [$joinedCols, $placeholders] = getJoinedSqlStrings($data);
+        $sql =
+            sprintf(
+                "INSERT INTO %s (%s) values (%s)",
+                static::$table_name,
+                $joinedCols,
+                $placeholders
+            );
+
+        $query = $mysqli->prepare($sql);
+        $query->execute(array_values($data));
+
+        return $query->insert_id;
+    }
+
+    // TODO: Fix and implement
+    // public function update($data)
+    // {
+    //     if ($this->id === -1) {
+    //         return false;
+    //     }
+    //     unset($data['id']);
+
+    //     global $mysqli;
+
+    //     $sql = sprintf(
+    //         "UPDATE %s
+    //         SET ?
+    //         WHERE %s = ?",
+    //         static::$table_name,
+    //         static::$primary_key
+    //     );
+    //     $colValArr = array_map(fn(string $col, string $v) => "$col=$v", array_keys($data), array_values($data));
+    //     $joinedColValString = implode(',', $colValArr);
+    //     var_dump($joinedColValString);
+
+    //     if ($mysqli->prepare($sql)->execute([$joinedColValString, $this->id])) {
+    //         return static::findById($this->id);
+    //     }
+
+    //     return false;
+    // }
+
+    public static function deleteById(int $id): bool
+    {
+        global $mysqli;
+
+        $sql = sprintf(
+            "DELETE FROM %s WHERE %s = ?",
+            static::$table_name,
+            static::$primary_key
+        );
+        return $mysqli->prepare($sql)->execute([$id]);
+    }
+
+    public function delete(): bool
+    {
+        if ($this->id === -1) {
+            return false;
+        }
+        return static::deleteById($this->id);
+    }
+
     /**
      * Returns an associative array respresentation of the model
-     * @return array
      */
     abstract public function toArray(): array;
 }

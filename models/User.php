@@ -55,41 +55,13 @@ class User extends Model
         $this->last_name = $last_name;
     }
 
-    public static function create(array $data): User
-    {
-        $newUserId = self::saveToDb([
-            'email' => $data['email'],
-            'password' => password_hash($data['password'], PASSWORD_BCRYPT),
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
-
-        ]);
-        $data['id'] = $newUserId;
-
-        return new self($data);
-    }
-
-    public function save()
-    {
-        $newUserId = self::saveToDb([
-            'email' => $this->email,
-            'password' => $this->password,
-            'first_name' => $this->first_name,
-            'last_name' => $this->last_name,
-        ]);
-
-        $this->id = $newUserId;
-        return true;
-    }
-
     public static function auth(string $email, string $password)
     {
         global $mysqli;
         $sql = sprintf("SELECT id, email, password, first_name, last_name FROM %s where email like ?", static::$table_name);
 
         $query = $mysqli->prepare($sql);
-        $query->bind_param("s", $email);
-        $query->execute();
+        $query->execute([$email]);
 
         $data = $query->get_result()->fetch_assoc();
 
@@ -98,25 +70,6 @@ class User extends Model
         }
 
         return false;
-    }
-
-    private static function saveToDb(array $data): int
-    {
-        global $mysqli;
-
-        $sql = sprintf("INSERT INTO %s values (null, ?, ?, ?, null, null, ?)", static::$table_name);
-
-        $query = $mysqli->prepare($sql);
-        $query->bind_param(
-            "ssss",
-            $data['email'],
-            $data['first_name'],
-            $data['last_name'],
-            $data['password'],
-        );
-        $query->execute();
-
-        return $query->insert_id;
     }
 
     public function toArray(): array
