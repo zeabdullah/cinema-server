@@ -26,6 +26,64 @@ class Film extends Model
         $this->duration = $data['duration'];
     }
 
+    public function getTitle()
+    {
+        return $this->title;
+    }
+    public function getDescription()
+    {
+        return $this->description;
+    }
+    public function getGenre()
+    {
+        return $this->genre;
+    }
+    public function getReleaseYear()
+    {
+        return $this->release_year;
+    }
+    public function getTrailerUrl()
+    {
+        return $this->trailer_url;
+    }
+    public function getDuration()
+    {
+        return $this->duration;
+    }
+    public function getReviews()
+    {
+        return $this->reviews;
+    }
+    public function getCast()
+    {
+        return $this->cast;
+    }
+
+    public function setTitle(string $title)
+    {
+        $this->title = $title;
+    }
+    public function setDescription(string $description)
+    {
+        $this->description = $description;
+    }
+    public function setGenre(string $genre)
+    {
+        $this->genre = $genre;
+    }
+    public function setReleaseYear(int $release_year)
+    {
+        $this->release_year = $release_year;
+    }
+    public function setTrailerUrl(string $trailer_url)
+    {
+        $this->trailer_url = $trailer_url;
+    }
+    public function setDuration(int $duration)
+    {
+        $this->duration = $duration;
+    }
+
     public function toArray(): array
     {
         return [
