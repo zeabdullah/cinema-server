@@ -1,5 +1,5 @@
 <?php
-require '../connection/connection.php';
+require_once '../connection/connection.php';
 
 abstract class Model
 {
@@ -20,7 +20,7 @@ abstract class Model
         global $mysqli;
 
         $sql = sprintf(
-            "Select * from %s WHERE %s = ?",
+            "SELECT * FROM %s WHERE %s = ?",
             static::$table_name,
             static::$primary_key
         );
@@ -37,7 +37,7 @@ abstract class Model
     {
         global $mysqli;
 
-        $sql = sprintf("Select * from %s", static::$table_name);
+        $sql = sprintf("SELECT * FROM %s", static::$table_name);
 
         $query = $mysqli->prepare($sql);
         $query->execute();
@@ -52,21 +52,66 @@ abstract class Model
         return $objects;
     }
 
-    abstract public function save(): bool;
+    public function save(): bool
+    {
+        if ($this->id === -1) {
+            return false;
+        }
 
-    abstract public static function create(array $data);
+        $data = $this->toArray();
+        unset($data['id']); // to prevent db insertion with ID '-1'
 
+        $this->id = static::insert($data);
+
+        return true;
+    }
+
+    public static function create(array $data)
+    {
+        $data['id'] = static::insert($data);
+        return new static($data);
+    }
+
+    private static function insert(array $data)
+    {
+        global $mysqli;
+
+        [$joinedCols, $placeholders] = getJoinedSqlStrings($data);
+        $sql =
+            sprintf(
+                "INSERT INTO %s (%s) values (%s)",
+                static::$table_name,
+                $joinedCols,
+                $placeholders
+            );
+
+        $query = $mysqli->prepare($sql);
+        $query->execute(array_values($data));
+
+        return $query->insert_id;
+    }
+
+    // TODO
     // abstract public function update();
+
+    public static function deleteById(int $id): bool
+    {
+        global $mysqli;
+
+        $sql = sprintf(
+            "DELETE FROM %s WHERE %s = ?",
+            static::$table_name,
+            static::$primary_key
+        );
+        return $mysqli->prepare($sql)->execute([$id]);
+    }
 
     public function delete(): bool
     {
         if ($this->id === -1) {
             return false;
         }
-        global $mysqli;
-
-        $sql = sprintf("DELETE FROM %s WHERE %s = ?", static::$table_name, static::$primary_key);
-        return $mysqli->prepare($sql)->execute([$this->id]);
+        return static::deleteById($this->id);
     }
 
     /**
