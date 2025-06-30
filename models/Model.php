@@ -91,8 +91,33 @@ abstract class Model
         return $query->insert_id;
     }
 
-    // TODO
-    // abstract public function update();
+    // TODO: Fix and implement
+    // public function update($data)
+    // {
+    //     if ($this->id === -1) {
+    //         return false;
+    //     }
+    //     unset($data['id']);
+
+    //     global $mysqli;
+
+    //     $sql = sprintf(
+    //         "UPDATE %s
+    //         SET ?
+    //         WHERE %s = ?",
+    //         static::$table_name,
+    //         static::$primary_key
+    //     );
+    //     $colValArr = array_map(fn(string $col, string $v) => "$col=$v", array_keys($data), array_values($data));
+    //     $joinedColValString = implode(',', $colValArr);
+    //     var_dump($joinedColValString);
+
+    //     if ($mysqli->prepare($sql)->execute([$joinedColValString, $this->id])) {
+    //         return static::findById($this->id);
+    //     }
+
+    //     return false;
+    // }
 
     public static function deleteById(int $id): bool
     {
