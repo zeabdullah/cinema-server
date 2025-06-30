@@ -55,36 +55,6 @@ class User extends Model
         $this->last_name = $last_name;
     }
 
-    public static function create(array $data): self
-    {
-        $newUserId = self::saveToDb([
-            'email' => $data['email'],
-            'password' => password_hash($data['password'], PASSWORD_BCRYPT),
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
-
-        ]);
-        $data['id'] = $newUserId;
-
-        return new self($data);
-    }
-
-    public function save(): bool
-    {
-        $newUserId = self::saveToDb([
-            'email' => $this->email,
-            'password' => $this->password,
-            'first_name' => $this->first_name,
-            'last_name' => $this->last_name,
-        ]);
-
-        $this->id = $newUserId;
-        return true;
-    }
-
-    // TODO
-    // public function update(): bool {}
-
     public static function auth(string $email, string $password)
     {
         global $mysqli;
@@ -100,23 +70,6 @@ class User extends Model
         }
 
         return false;
-    }
-
-    private static function saveToDb(array $data): int
-    {
-        global $mysqli;
-
-        $sql = sprintf("INSERT INTO %s values (null, ?, ?, ?, null, null, ?)", static::$table_name);
-
-        $query = $mysqli->prepare($sql);
-        $query->execute([
-            $data['email'],
-            $data['first_name'],
-            $data['last_name'],
-            $data['password'],
-        ]);
-
-        return $query->insert_id;
     }
 
     public function toArray(): array
