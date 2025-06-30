@@ -4,11 +4,11 @@ require_once 'Model.php';
 class Film extends Model
 {
     private string $title;
-    private string|null $description;
     private string $genre;
     private int $release_year;
-    private string|null $trailer_url;
     private int $duration;
+    private string|null $description;
+    private string|null $trailer_url;
 
     private array $reviews = [];
     private array $cast = [];
