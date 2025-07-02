@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 $search = $_GET['search'] ?? '';
-$page = (int) $_GET['page'] ?? 1;
+$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 $genre = $_GET['genre'] ?? null;
 
 $result = Film::search($search, $page, $genre);
