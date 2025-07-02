@@ -9,6 +9,7 @@ class Film extends Model
     private int $duration;
     private string|null $description;
     private string|null $trailer_url;
+    private string $poster_url;
 
     private array $reviews = [];
     private array $cast = [];
@@ -23,6 +24,7 @@ class Film extends Model
         $this->description = $data['description'] ?? null;
         $this->release_year = $data['release_year'];
         $this->trailer_url = $data['trailer_url'] ?? null;
+        $this->poster_url = $data['poster_url'] ?? null;
         $this->duration = $data['duration'];
     }
 
@@ -45,6 +47,10 @@ class Film extends Model
     public function getTrailerUrl()
     {
         return $this->trailer_url;
+    }
+    public function getPosterUrl()
+    {
+        return $this->poster_url;
     }
     public function getDuration()
     {
@@ -76,6 +82,10 @@ class Film extends Model
         $this->release_year = $release_year;
     }
     public function setTrailerUrl(string $trailer_url)
+    {
+        $this->trailer_url = $trailer_url;
+    }
+    public function setPosterUrl(string $trailer_url)
     {
         $this->trailer_url = $trailer_url;
     }
@@ -146,6 +156,7 @@ class Film extends Model
             'description' => $this->description,
             'release_year' => $this->release_year,
             'trailer_url' => $this->trailer_url,
+            'poster_url' => $this->poster_url,
             'duration' => $this->duration,
         ];
     }

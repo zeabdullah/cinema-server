@@ -1,5 +1,6 @@
 <?php
 require_once '../connection/connection.php';
+require_once '../helpers/helpers.php';
 
 abstract class Model
 {
