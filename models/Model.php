@@ -1,5 +1,5 @@
 <?php
-require_once '../connection/connection.php';
+require_once '../connection/Database.php';
 require_once '../helpers/helpers.php';
 
 abstract class Model
@@ -20,7 +20,7 @@ abstract class Model
 
     public static function findById(int $id)
     {
-        global $mysqli;
+        $db = Database::getInstance();
 
         $sql = sprintf(
             "SELECT * FROM %s WHERE %s = ?",
@@ -28,7 +28,7 @@ abstract class Model
             static::$primary_key
         );
 
-        $query = $mysqli->prepare($sql);
+        $query = $db->prepare($sql);
         $query->execute([$id]);
 
         $data = $query->get_result()->fetch_assoc();
@@ -38,11 +38,11 @@ abstract class Model
 
     public static function getAll()
     {
-        global $mysqli;
+        $db = Database::getInstance();
 
         $sql = sprintf("SELECT * FROM %s", static::$table_name);
 
-        $query = $mysqli->prepare($sql);
+        $query = $db->prepare($sql);
         $query->execute();
 
         $data = $query->get_result();
@@ -77,7 +77,7 @@ abstract class Model
 
     private static function insert(array $data)
     {
-        global $mysqli;
+        $db = Database::getInstance();
 
         [$joinedCols, $placeholders] = getJoinedSqlStrings($data);
         $sql =
@@ -88,50 +88,47 @@ abstract class Model
                 $placeholders
             );
 
-        $query = $mysqli->prepare($sql);
+        $query = $db->prepare($sql);
         $query->execute(array_values($data));
 
         return $query->insert_id;
     }
 
-    // TODO: Fix and implement
-    // public function update($data)
-    // {
-    //     if ($this->id === -1) {
-    //         return false;
-    //     }
-    //     unset($data['id']);
+    public function update($data): bool
+    {
+        if ($this->id === -1)
+            return false;
 
-    //     global $mysqli;
+        unset($data['id']);
 
-    //     $sql = sprintf(
-    //         "UPDATE %s
-    //         SET ?
-    //         WHERE %s = ?",
-    //         static::$table_name,
-    //         static::$primary_key
-    //     );
-    //     $colValArr = array_map(fn(string $col, string $v) => "$col=$v", array_keys($data), array_values($data));
-    //     $joinedColValString = implode(',', $colValArr);
-    //     var_dump($joinedColValString);
+        $sqlSetColumnsArr = array_fill(0, count($data), "%s=?");
+        $sqlSetColumnsStr = implode(',', $sqlSetColumnsArr);
+        $sqlSetColumnsStrFormatted = sprintf($sqlSetColumnsStr, ...array_keys($data));
 
-    //     if ($mysqli->prepare($sql)->execute([$joinedColValString, $this->id])) {
-    //         return static::findById($this->id);
-    //     }
+        $sql = sprintf(
+            "UPDATE %s
+            SET %s
+            WHERE %s = ?",
+            static::$table_name,
+            $sqlSetColumnsStrFormatted,
+            static::$primary_key
+        );
 
-    //     return false;
-    // }
+        $db = Database::getInstance();
+        $isSuccessful = $db->prepare($sql)->execute([...array_values($data), $this->id]);
+        return $isSuccessful;
+    }
 
     public static function deleteById(int $id): bool
     {
-        global $mysqli;
+        $db = Database::getInstance();
 
         $sql = sprintf(
             "DELETE FROM %s WHERE %s = ?",
             static::$table_name,
             static::$primary_key
         );
-        return $mysqli->prepare($sql)->execute([$id]);
+        return $db->prepare($sql)->execute([$id]);
     }
 
     public function delete(): bool

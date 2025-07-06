@@ -1,5 +1,5 @@
 <?php
-require_once '../connection/connection.php';
+require_once '../connection/Database.php';
 
 $sql =
     'ALTER TABLE films
@@ -16,13 +16,14 @@ $sql =
     );
 ';
 
+$db = Database::getInstance();
 
 echo 'Migration 003:';
-$firstSuccess = $mysqli->multi_query($sql);
+$firstSuccess = $db->multi_query($sql);
 if ($firstSuccess) {
     echo 'first ok' . '<br>';
 }
-while ($mysqli->next_result()) {
+while ($db->next_result()) {
     echo 'ok' . '<br>';
 }
 

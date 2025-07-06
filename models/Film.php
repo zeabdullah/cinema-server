@@ -96,10 +96,10 @@ class Film extends Model
 
     public static function search(string $search = '', int $page = 1, string $genre = null)
     {
+        $db = Database::getInstance();
+
         $page = max($page, 1);
         $isGenreSet = isset($genre) && $genre !== '';
-
-        global $mysqli;
 
         $dataSql = sprintf(
             "SELECT * FROM %s 
@@ -121,8 +121,8 @@ class Film extends Model
             $isGenreSet ? "AND genre like ?" : "",
         );
 
-        $dataQuery = $mysqli->prepare($dataSql);
-        $countQuery = $mysqli->prepare($countSql);
+        $dataQuery = $db->prepare($dataSql);
+        $countQuery = $db->prepare($countSql);
 
         $searchWithWildcard = "%$search%";
         if ($isGenreSet) {

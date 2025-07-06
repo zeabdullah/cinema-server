@@ -57,10 +57,10 @@ class User extends Model
 
     public static function auth(string $email, string $password)
     {
-        global $mysqli;
+        $db = Database::getInstance();
         $sql = sprintf("SELECT id, email, password, first_name, last_name FROM %s where email like ?", static::$table_name);
 
-        $query = $mysqli->prepare($sql);
+        $query = $db->prepare($sql);
         $query->execute([$email]);
 
         $data = $query->get_result()->fetch_assoc();
