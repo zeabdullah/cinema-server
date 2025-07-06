@@ -94,33 +94,30 @@ abstract class Model
         return $query->insert_id;
     }
 
-    // TODO: Fix and implement
-    // public function update($data)
-    // {
-    //     if ($this->id === -1) {
-    //         return false;
-    //     }
-    //     unset($data['id']);
+    public function update($data): bool
+    {
+        if ($this->id === -1)
+            return false;
 
-    //     global $mysqli;
+        unset($data['id']);
 
-    //     $sql = sprintf(
-    //         "UPDATE %s
-    //         SET ?
-    //         WHERE %s = ?",
-    //         static::$table_name,
-    //         static::$primary_key
-    //     );
-    //     $colValArr = array_map(fn(string $col, string $v) => "$col=$v", array_keys($data), array_values($data));
-    //     $joinedColValString = implode(',', $colValArr);
-    //     var_dump($joinedColValString);
+        $sqlSetColumnsArr = array_fill(0, count($data), "%s=?");
+        $sqlSetColumnsStr = implode(',', $sqlSetColumnsArr);
+        $sqlSetColumnsStrFormatted = sprintf($sqlSetColumnsStr, ...array_keys($data));
 
-    //     if ($mysqli->prepare($sql)->execute([$joinedColValString, $this->id])) {
-    //         return static::findById($this->id);
-    //     }
+        $sql = sprintf(
+            "UPDATE %s
+            SET %s
+            WHERE %s = ?",
+            static::$table_name,
+            $sqlSetColumnsStrFormatted,
+            static::$primary_key
+        );
 
-    //     return false;
-    // }
+        $db = Database::getInstance();
+        $isSuccessful = $db->prepare($sql)->execute([...array_values($data), $this->id]);
+        return $isSuccessful;
+    }
 
     public static function deleteById(int $id): bool
     {
